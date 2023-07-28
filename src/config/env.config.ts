@@ -199,7 +199,7 @@ export class ConfigService {
       REDIS: {
         ENABLED: process.env?.REDIS_ENABLED === 'true',
         URI: process.env.REDIS_URI,
-        PREFIX_KEY: process.env.REDIS_PREFIX_KEY,
+        PREFIX_KEY: process.env.REDIS_PREFIX_KEY || 'evdocker',
       },
       LOG: {
         LEVEL: process.env?.LOG_LEVEL.split(',') as LogLevel[],
