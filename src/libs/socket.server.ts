@@ -10,18 +10,22 @@ let io: SocketIO;
 
 const cors = configService.get<Cors>('CORS').ORIGIN;
 
-export const initIO = (httpServer: Server) => {
-  if (configService.get<Websocket>('WEBSOCKET').ENABLED) {
+export const initIO = (httpServer: Server) =>
+{
+  if (configService.get<Websocket>('WEBSOCKET').ENABLED)
+  {
     io = new SocketIO(httpServer, {
       cors: {
         origin: cors,
       },
     });
 
-    io.on('connection', (socket) => {
+    io.on('connection', (socket) =>
+    {
       logger.info('User connected');
 
-      socket.on('disconnect', () => {
+      socket.on('disconnect', () =>
+      {
         logger.info('User disconnected');
       });
     });
@@ -32,10 +36,12 @@ export const initIO = (httpServer: Server) => {
   return null;
 };
 
-export const getIO = (): SocketIO => {
+export const getIO = (): SocketIO =>
+{
   logger.verbose('Getting Socket.io');
 
-  if (!io) {
+  if (!io)
+  {
     logger.error('Socket.io not initialized');
     throw new Error('Socket.io not initialized');
   }
