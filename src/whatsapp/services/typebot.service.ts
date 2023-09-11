@@ -6,34 +6,41 @@ import { Session, TypebotDto } from '../dto/typebot.dto';
 import { MessageRaw } from '../models';
 import { WAMonitoringService } from './monitor.service';
 
-export class TypebotService {
-  constructor(private readonly waMonitor: WAMonitoringService) {}
+export class TypebotService
+{
+  constructor (private readonly waMonitor: WAMonitoringService) { }
 
   private readonly logger = new Logger(TypebotService.name);
 
-  public create(instance: InstanceDto, data: TypebotDto) {
+  public create (instance: InstanceDto, data: TypebotDto)
+  {
     this.logger.verbose('create typebot: ' + instance.instanceName);
     this.waMonitor.waInstances[instance.instanceName].setTypebot(data);
 
     return { typebot: { ...instance, typebot: data } };
   }
 
-  public async find(instance: InstanceDto): Promise<TypebotDto> {
-    try {
+  public async find (instance: InstanceDto): Promise<TypebotDto>
+  {
+    try
+    {
       this.logger.verbose('find typebot: ' + instance.instanceName);
       const result = await this.waMonitor.waInstances[instance.instanceName].findTypebot();
 
-      if (Object.keys(result).length === 0) {
+      if (Object.keys(result).length === 0)
+      {
         throw new Error('Typebot not found');
       }
 
       return result;
-    } catch (error) {
+    } catch (error)
+    {
       return { enabled: false, url: '', typebot: '', expire: 0, sessions: [] };
     }
   }
 
-  public async changeStatus(instance: InstanceDto, data: any) {
+  public async changeStatus (instance: InstanceDto, data: any)
+  {
     const remoteJid = data.remoteJid;
     const status = data.status;
 
@@ -41,8 +48,10 @@ export class TypebotService {
 
     const session = findData.sessions.find((session) => session.remoteJid === remoteJid);
 
-    if (session) {
-      if (status === 'closed') {
+    if (session)
+    {
+      if (status === 'closed')
+      {
         findData.sessions.splice(findData.sessions.indexOf(session), 1);
 
         const typebotData = {
@@ -61,8 +70,10 @@ export class TypebotService {
         return { typebot: { ...instance, typebot: typebotData } };
       }
 
-      findData.sessions.map((session) => {
-        if (session.remoteJid === remoteJid) {
+      findData.sessions.map((session) =>
+      {
+        if (session.remoteJid === remoteJid)
+        {
           session.status = status;
         }
       });
@@ -84,7 +95,8 @@ export class TypebotService {
     return { typebot: { ...instance, typebot: typebotData } };
   }
 
-  public async startTypebot(instance: InstanceDto, data: any) {
+  public async startTypebot (instance: InstanceDto, data: any)
+  {
     const remoteJid = data.remoteJid;
     const url = data.url;
     const typebot = data.typebot;
@@ -126,7 +138,8 @@ export class TypebotService {
     };
   }
 
-  private getTypeMessage(msg: any) {
+  private getTypeMessage (msg: any)
+  {
     this.logger.verbose('get type message');
 
     const types = {
@@ -139,7 +152,8 @@ export class TypebotService {
     return types;
   }
 
-  private getMessageContent(types: any) {
+  private getMessageContent (types: any)
+  {
     this.logger.verbose('get message content');
     const typeKey = Object.keys(types).find((key) => types[key] !== undefined);
 
@@ -150,7 +164,8 @@ export class TypebotService {
     return result;
   }
 
-  private getConversationMessage(msg: any) {
+  private getConversationMessage (msg: any)
+  {
     this.logger.verbose('get conversation message');
 
     const types = this.getTypeMessage(msg);
@@ -162,7 +177,8 @@ export class TypebotService {
     return messageContent;
   }
 
-  public async createNewSession(instance: InstanceDto, data: any) {
+  public async createNewSession (instance: InstanceDto, data: any)
+  {
     const id = Math.floor(Math.random() * 10000000000).toString();
     const reqData = {
       sessionId: id,
@@ -178,7 +194,8 @@ export class TypebotService {
 
     const request = await axios.post(data.url + '/api/v1/sendMessage', reqData);
 
-    if (request.data.sessionId) {
+    if (request.data.sessionId)
+    {
       data.sessions.push({
         remoteJid: data.remoteJid,
         sessionId: `${id}-${request.data.sessionId}`,
@@ -204,59 +221,74 @@ export class TypebotService {
     return request.data;
   }
 
-  public async sendWAMessage(
+  public async sendWAMessage (
     instance: InstanceDto,
     remoteJid: string,
     messages: any[],
     input: any[],
     clientSideActions: any[],
-  ) {
+  )
+  {
     processMessages(this.waMonitor.waInstances[instance.instanceName], messages, input, clientSideActions).catch(
-      (err) => {
+      (err) =>
+      {
         console.error('Erro ao processar mensagens:', err);
       },
     );
 
-    function findItemAndGetSecondsToWait(array, targetId) {
+    function findItemAndGetSecondsToWait (array, targetId)
+    {
       if (!array) return null;
 
-      for (const item of array) {
-        if (item.lastBubbleBlockId === targetId) {
+      for (const item of array)
+      {
+        if (item.lastBubbleBlockId === targetId)
+        {
           return item.wait?.secondsToWaitFor;
         }
       }
       return null;
     }
 
-    async function processMessages(instance, messages, input, clientSideActions) {
-      for (const message of messages) {
+    async function processMessages (instance, messages, input, clientSideActions)
+    {
+      for (const message of messages)
+      {
         const wait = findItemAndGetSecondsToWait(clientSideActions, message.id);
 
-        if (message.type === 'text') {
+        if (message.type === 'text')
+        {
           let formattedText = '';
 
           let linkPreview = false;
 
-          for (const richText of message.content.richText) {
-            for (const element of richText.children) {
+          for (const richText of message.content.richText)
+          {
+            for (const element of richText.children)
+            {
               let text = '';
-              if (element.text) {
+              if (element.text)
+              {
                 text = element.text;
               }
 
-              if (element.bold) {
+              if (element.bold)
+              {
                 text = `*${text}*`;
               }
 
-              if (element.italic) {
+              if (element.italic)
+              {
                 text = `_${text}_`;
               }
 
-              if (element.underline) {
+              if (element.underline)
+              {
                 text = `~${text}~`;
               }
 
-              if (element.url) {
+              if (element.url)
+              {
                 const linkText = element.children[0].text;
                 text = `[${linkText}](${element.url})`;
                 linkPreview = true;
@@ -282,7 +314,8 @@ export class TypebotService {
           });
         }
 
-        if (message.type === 'image') {
+        if (message.type === 'image')
+        {
           await instance.mediaMessage({
             number: remoteJid.split('@')[0],
             options: {
@@ -296,7 +329,8 @@ export class TypebotService {
           });
         }
 
-        if (message.type === 'video') {
+        if (message.type === 'video')
+        {
           await instance.mediaMessage({
             number: remoteJid.split('@')[0],
             options: {
@@ -310,7 +344,8 @@ export class TypebotService {
           });
         }
 
-        if (message.type === 'audio') {
+        if (message.type === 'audio')
+        {
           await instance.audioWhatsapp({
             number: remoteJid.split('@')[0],
             options: {
@@ -325,13 +360,16 @@ export class TypebotService {
         }
       }
 
-      if (input) {
-        if (input.type === 'choice input') {
+      if (input)
+      {
+        if (input.type === 'choice input')
+        {
           let formattedText = '';
 
           const items = input.items;
 
-          for (const item of items) {
+          for (const item of items)
+          {
             formattedText += `▶️ ${item.content}\n`;
           }
 
@@ -353,7 +391,8 @@ export class TypebotService {
     }
   }
 
-  public async sendTypebot(instance: InstanceDto, remoteJid: string, msg: MessageRaw) {
+  public async sendTypebot (instance: InstanceDto, remoteJid: string, msg: MessageRaw)
+  {
     const url = (await this.find(instance)).url;
     const typebot = (await this.find(instance)).typebot;
     const sessions = ((await this.find(instance)).sessions as Session[]) ?? [];
@@ -364,14 +403,16 @@ export class TypebotService {
 
     const session = sessions.find((session) => session.remoteJid === remoteJid);
 
-    if (session && expire && expire > 0) {
+    if (session && expire && expire > 0)
+    {
       const now = Date.now();
 
       const diff = now - session.updateAt;
 
       const diffInMinutes = Math.floor(diff / 1000 / 60);
 
-      if (diffInMinutes > expire) {
+      if (diffInMinutes > expire)
+      {
         sessions.splice(sessions.indexOf(session), 1);
 
         const data = await this.createNewSession(instance, {
@@ -392,11 +433,13 @@ export class TypebotService {
       }
     }
 
-    if (session && session.status !== 'opened') {
+    if (session && session.status !== 'opened')
+    {
       return;
     }
 
-    if (!session) {
+    if (!session)
+    {
       const data = await this.createNewSession(instance, {
         url: url,
         typebot: typebot,
@@ -414,8 +457,10 @@ export class TypebotService {
       return;
     }
 
-    sessions.map((session) => {
-      if (session.remoteJid === remoteJid) {
+    sessions.map((session) =>
+    {
+      if (session.remoteJid === remoteJid)
+      {
         session.updateAt = Date.now();
       }
     });
@@ -435,23 +480,13 @@ export class TypebotService {
 
     const content = this.getConversationMessage(msg.message);
 
-    if (!content) {
-      if (unknown_message) {
-        this.waMonitor.waInstances[instance.instanceName].textMessage({
-          number: remoteJid.split('@')[0],
-          options: {
-            delay: delay_message || 1000,
-            presence: 'composing',
-          },
-          textMessage: {
-            text: unknown_message,
-          },
-        });
-      }
+    if (!content)
+    {
       return;
     }
 
-    if (content.toLowerCase() === keyword_finish.toLowerCase()) {
+    if (content.toLowerCase() === keyword_finish.toLowerCase())
+    {
       sessions.splice(sessions.indexOf(session), 1);
 
       const typebotData = {
