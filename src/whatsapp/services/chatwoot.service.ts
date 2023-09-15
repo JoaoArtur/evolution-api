@@ -210,8 +210,8 @@ export class ChatwootService {
         '123456',
         inboxId,
         false,
-        'EvolutionAPI',
-        'https://evolution-api.com/files/evolution-api-favicon.png',
+        'Zap Launch',
+        'https://app.zaplaunch.com.br/img/logo.png',
       )) as any);
 
     if (!contact) {
@@ -1448,7 +1448,7 @@ export class ChatwootService {
         this.logger.verbose('event connection.update');
 
         if (body.status === 'open') {
-          const msgConnection = `🚀 Connection successfully established!`;
+          const msgConnection = `🚀 Conexão estabelecida com sucesso!`;
 
           this.logger.verbose('send message to chatwoot');
           await this.createBotMessage(instance, msgConnection, 'incoming');
@@ -1459,7 +1459,7 @@ export class ChatwootService {
         this.logger.verbose('event qrcode.updated');
         if (body.statusCode === 500) {
           this.logger.verbose('qrcode error');
-          const erroQRcode = `🚨 QRCode generation limit reached, to generate a new QRCode, send the 'init' message again.`;
+          const erroQRcode = `🚨 Limite de geração de QRCode atingido, para gerar um novo QRCode, envie novamente a mensagem 'init'.`;
 
           this.logger.verbose('send message to chatwoot');
           return await this.createBotMessage(instance, erroQRcode, 'incoming');
@@ -1477,7 +1477,7 @@ export class ChatwootService {
           this.logger.verbose('send qrcode to chatwoot');
           await this.createBotQr(instance, 'QRCode successfully generated!', 'incoming', fileName);
 
-          let msgQrCode = `⚡️ QRCode successfully generated!\n\nScan this QR code within the next 40 seconds.`;
+          let msgQrCode = `⚡️ QRCode gerado com sucesso!\n\nLeia este código QR nos próximos 40 segundos.`;
 
           if (body?.qrcode?.pairingCode) {
             msgQrCode =
